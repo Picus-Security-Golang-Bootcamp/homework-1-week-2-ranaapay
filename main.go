@@ -6,57 +6,75 @@ import (
 	"strings"
 )
 
-var books = []string{
-	"In Search of Lost Time",
-	"Ulysses",
-	"Don Quixote",
-	"One Hundred Years of Solitude",
-	"The Great Gatsby",
-	"War and Peace",
-	"Hamlet",
-	"The Odyssey",
-	"Madame Bovary",
-	"The Divine Comedy",
-	"Lolita",
-	"The Brothers Karamazov",
-	"Crime and Punishment",
+type Book struct {
+	Name        string
+	Author      string
+	PublishTime string
 }
 
-func main(){
+type Library struct {
+	BookList *[]Book
+}
+
+//insertBooks create static book list and assign it to BookList in Library.
+func (l *Library) insertBooks() {
+	var bookList []Book
+	var bookOne = Book{
+		Name:        "In Search of Lost Time",
+		Author:      "Marcel Proust",
+		PublishTime: "1913",
+	}
+	var bookTwo = Book{
+		Name:        "Ulysses",
+		Author:      "James Joyce",
+		PublishTime: "1920",
+	}
+	var bookThree = Book{
+		Name:        "Crime and Punishment",
+		Author:      "Fyodor Dostoyevski",
+		PublishTime: "1866",
+	}
+	bookList = append(bookList, bookOne, bookTwo, bookThree)
+	l.BookList = &bookList
+}
+
+//WriteBookList returns console to book list in Library
+func (l *Library) writeBookList() {
+	for i, book := range *l.BookList {
+		fmt.Printf("Book : %d ---------------\nName : %s\nAuthor : %s\nPublish Year : %s\n\n", i+1, book.Name, book.Author, book.PublishTime)
+	}
+}
+
+//FindBook check is book in the book list and returns the book
+func (l *Library) findBook(searchBook string) (Book, bool) {
+	searchBook = strings.ToLower(searchBook)
+	for _, book := range *l.BookList {
+		bLow := strings.ToLower(book.Name)
+		if searchBook == bLow {
+			return book, false
+		}
+	}
+	return Book{}, false
+}
+
+func main() {
+	var library Library
+	library.insertBooks()
 	args := os.Args[1:]
 	command := args[0]
 	switch command {
 	case "list":
-		WriteBookList()
+		library.writeBookList()
 	case "search":
 		searchingText := args[1:]
 		searchingBook := strings.Join(searchingText, " ")
-		result := FindBook(searchingBook)
-		if result == "" {
+		book, res := library.findBook(searchingBook)
+		if res == false {
 			fmt.Printf("Book with %s name is not contain in the book list.", searchingBook)
 		} else {
-			fmt.Println(result)
+			fmt.Printf("Name : %s\nAuthor : %s\nPublish Year : %s\n\n", book.Name, book.Author, book.PublishTime)
 		}
 	default:
 		fmt.Println("Please write valid command. ( list or search )")
 	}
-}
-
-//WriteBookList returns console to book list
-func WriteBookList(){
-	for _, book := range books {
-		fmt.Println(book)
-	}
-}
-
-//FindBook check is book in the book list and returns the name
-func FindBook(searchBook string) string {
-	searchBook = strings.ToLower(searchBook)
-	for _, b := range books {
-		bLow := strings.ToLower(b)
-		if searchBook == bLow {
-			return b
-		}
-	}
-	return ""
 }
